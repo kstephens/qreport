@@ -131,8 +131,9 @@ END
     def delete! options = nil
       truncate!
       options = _options options
-      conn.run "DELETE FROM qr_report_runs WHERE id = :qr_run_id", options.merge(:verbose => true)
-      result = conn.run "SELECT COUNT(*) AS \"count\" from qr_report_runs WHERE report_table = :report_table",
+      conn.run "DELETE FROM qr_report_runs WHERE id = :qr_run_id", options # .merge(:verbose => true)
+      result =
+      conn.run "SELECT COUNT(*) AS \"count\" from qr_report_runs WHERE report_table = :report_table",
       :arguments => { :report_table => report_table } # , :verbose => true
       if result.rows[0]["count"] <= 0
         conn.run "-- DROP TABLE #{report_table}", :verbose => true
