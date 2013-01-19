@@ -173,6 +173,8 @@ module Qreport
         "'" << conn.escape_string(val.to_s) << QUOTE
       when Time
         escape_value(val.iso8601(6)) << "::timestamp"
+      when Hash, Array
+        escape_value(val.to_json)
       else
         raise TypeError
       end.to_s
@@ -256,9 +258,8 @@ module Qreport
         sql = @sql_prepared = prepare_sql self.sql
         if conn.verbose || options[:verbose]
           $stderr.puts "\n-- =================================================================== --"
-          $stderr.puts "-- ::"
           $stderr.puts sql
-          $stderr.puts ""
+          $stderr.puts "-- ==== --"
         end
         return self if options[:dry_run]
         if result = conn.run_query!(sql, self, options)

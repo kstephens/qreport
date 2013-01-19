@@ -4,6 +4,7 @@ describe Qreport::ReportRunner do
   attr :reports, :now
 
   it "should generate two reports" do
+    # conn.verbose = conn.verbose_result = true
     run_reports!
     reports.size.should == 4
 
@@ -21,6 +22,10 @@ describe Qreport::ReportRunner do
 
     r = reports['60 days']
     r.select.rows.map{|x| x["user_id"]}.should == (1..10).to_a
+
+    reports.values.each do | r |
+      r.delete!
+    end
   end
 
   it "should DROP TABLE after all report runs are deleted." do
@@ -29,6 +34,27 @@ describe Qreport::ReportRunner do
       r.delete!
     end
     conn.run("SELECT COUNT(*) AS c FROM qr_report_runs").rows[0]["c"].should == 0
+  end
+
+  it "should capture errors into ReportRun#error." do
+    # conn.verbose = true
+    report_run = Qreport::ReportRun.new(:name => :users_with_articles, :description => '10 days')
+    report_run.arguments = {
+      :now => conn.safe_sql("unknown_column"),
+      :interval => '10 days',
+    }
+    report_run.sql = <<"END"
+    SELECT u.id AS "user_id"
+    FROM   users u
+    WHERE
+      EXISTS(SELECT * FROM articles a WHERE a.user_id = u.id AND a.created_on >= :now - INTERVAL :interval)
+END
+    report_run.run! conn
+    report_run.error.class.should == Hash
+    report_run.error[:error_class].should == 'PG::Error'
+    report_run.error[:error_message].should =~ /column "unknown_column" does not exist/
+
+    report_run.delete!
   end
 
   def run_reports!
@@ -65,17 +91,26 @@ END
   end
 
   attr :conn, :now
-  before :each do
-    @now = Time.now
+
+  before :all do
     @conn = Qreport::Connection.new
     # conn.verbose = true
 
-    begin
-      Qreport::ReportRun.schema! conn
-    rescue ::PG::Error
+    if conn.table_exists? "qr_report_runs"
+      conn.run "DROP TABLE qr_report_runs"
+      conn.run "DROP SEQUENCE qr_report_runs_pkey"
     end
 
-    conn.transaction_begin
+    conn.transaction do
+      Qreport::ReportRun.schema! conn
+    end
+
+    if conn.table_exists? "users"
+      conn.run "DROP TABLE users"
+      conn.run "DROP SEQUENCE users_pkey"
+      conn.run "DROP TABLE articles"
+      conn.run "DROP SEQUENCE articles_pkey"
+    end
 
     conn.run <<"END"
 CREATE SEQUENCE users_pkey;
@@ -92,6 +127,17 @@ CREATE TABLE articles (
   , created_on   TIMESTAMP WITH TIME ZONE NOT NULL
 );
 END
+
+  end
+
+  before :each do
+    @conn = Qreport::Connection.new
+    @now = Time.now
+
+    conn.run "DELETE FROM qr_report_runs"
+    conn.run "DELETE FROM articles"
+    conn.run "DELETE FROM users"
+
     (1 .. 10).each do | i |
       conn.run "INSERT INTO users :NAMES_AND_VALUES",
       :arguments => { :names_and_values => {
@@ -109,9 +155,5 @@ END
           :created_on => now - i * 86000,
         } }
     end
-  end
-
-  after :each do
-    conn.transaction_end :abort
   end
 end

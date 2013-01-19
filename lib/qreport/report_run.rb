@@ -27,6 +27,7 @@ module Qreport
     def column_signature
       @column_signature ||=
         begin
+          return @column_signature = "ERROR" if base_columns.empty?
           column_signature_string = columns.to_json
           @column_signature_hash = Digest::MD5.hexdigest(column_signature_string)
           Base64.strict_encode64(Digest::MD5.digest(column_signature_string)).
@@ -37,8 +38,18 @@ module Qreport
         end
     end
 
+    def base_columns
+      @base_columns ||= EMPTY_Array
+    end
+
+    def additional_columns
+      @additional_columns ||= EMPTY_Array
+    end
+
     def columns
-      @columns ||= base_columns + additional_columns.map{|x| x.map(&:to_s)}
+      @columns ||=
+        base_columns +
+        additional_columns.map{|x| x.map(&:to_s)}
     end
 
     def run! conn
@@ -48,8 +59,26 @@ module Qreport
       self
     end
 
-    def self.schema! conn
-      result = conn.run <<"END", :capture_error => true # , :verbose => true
+    def error
+      self.error = @error if String === @error
+      @error
+    end
+
+    def error= x
+      case x
+      when nil, Hash
+        @error = x
+      when String
+        @error = JSON.parse(x)
+      when Exception
+        @error = { :error_class => x.class.name, :error_message => x.message }
+      else
+        raise TypeError
+      end
+    end
+
+    def self.schema! conn, options = { }
+      result = conn.run <<"END", options.merge(:capture_error => true) # , :verbose => true
 CREATE SEQUENCE qr_report_runs_pkey;
 CREATE TABLE -- IF NOT EXISTS
 qr_report_runs (
@@ -61,6 +90,7 @@ qr_report_runs (
   , base_columns TEXT NOT NULL
   , additional_columns TEXT NOT NULL
   , report_table VARCHAR(255) NOT NULL
+  , error        TEXT
   , created_at   TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
   , started_at   TIMESTAMP WITH TIME ZONE
   , finished_at  TIMESTAMP WITH TIME ZONE
@@ -77,10 +107,11 @@ END
         :name => name,
         :sql => sql,
         :description => description,
-        :arguments => (arguments || { }).to_json,
-        :base_columns => base_columns.to_json,
-        :additional_columns => additional_columns.to_json,
+        :arguments => (arguments || { }),
+        :base_columns => base_columns,
+        :additional_columns => additional_columns,
         :report_table => report_table,
+        :error => error,
         :created_at => created_at,
         :started_at => started_at,
         :finished_at => finished_at,
@@ -88,7 +119,7 @@ END
       }
 
       result = conn.run 'INSERT INTO qr_report_runs ( :NAMES ) VALUES ( :VALUES ) RETURNING id',
-      :arguments => { :names_and_values => values } #, :verbose => true, :verbose_arguments => true
+      :arguments => { :names_and_values => values } # , :verbose => true, :verbose_arguments => true
       self.id = result.rows[0]["id"] or raise "no id"
 
       self
@@ -139,18 +170,20 @@ END
     def delete! options = nil
       truncate!
       options = _options options
+      options.update(:capture_error => true)
       conn.run "DELETE FROM qr_report_runs WHERE id = :qr_run_id", options # .merge(:verbose => true)
       result =
       conn.run "SELECT COUNT(*) AS \"count\" from qr_report_runs WHERE report_table = :report_table",
-      :arguments => { :report_table => report_table } # , :verbose => true
+      :arguments => { :report_table => report_table }, :capture_error => true # , :verbose => true
       if result.rows[0]["count"] <= 0
-        conn.run "-- DROP TABLE #{report_table}", :verbose => true
+        conn.run "-- DROP TABLE #{report_table}", :capture_error => true  # , :verbose => true
       end
     end
 
     # Deletes the actual rows for this report run.
     def truncate! options = nil
       options = _options options
+      options.update(:capture_error => true)
       conn.run "DELETE FROM #{report_table} WHERE qr_run_id = :qr_run_id :WHERE?", options
       self
     end
