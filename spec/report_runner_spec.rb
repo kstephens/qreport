@@ -35,12 +35,10 @@ describe Qreport::ReportRunner do
     @reports = { }
 
     sql = <<"END"
-    SELECT
-        u.id AS "user_id"
-    FROM
-        users u
+    SELECT u.id AS "user_id"
+    FROM   users u
     WHERE
-        EXISTS(SELECT * FROM articles a WHERE a.user_id = u.id AND a.created_on >= :now - INTERVAL :interval)
+      EXISTS(SELECT * FROM articles a WHERE a.user_id = u.id AND a.created_on >= :now - INTERVAL :interval)
     ;
 END
 
