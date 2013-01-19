@@ -21,6 +21,7 @@ Or install it yourself as:
 Qreport rewrites a plain SQL query so that its result set can populate a report table.
 It automatically creates the report table based on a signature of the column names and types of the query result.
 It can also add additional columns to the report table for other uses, for example: batch processing.
+Currently supports PostgreSQL.
 
 ## Example:
 
