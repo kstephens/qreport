@@ -37,7 +37,6 @@ module Qreport
         end # transaction
       rescue ::Exception => exc
         error = error_1 = exc
-        $stderr.puts "  error_1 = #{exc.inspect}"
       end
 
       # Construct report_table name from column names and types:
@@ -82,7 +81,6 @@ module Qreport
           end # transaction
         rescue ::Exception => exc
           error = error_2 = exc
-          $stderr.puts "  error_2 = #{exc.inspect}"
         end # transaction
       end
 
