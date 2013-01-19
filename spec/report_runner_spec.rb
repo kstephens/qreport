@@ -23,6 +23,14 @@ describe Qreport::ReportRunner do
     r.select.rows.map{|x| x["user_id"]}.should == (1..10).to_a
   end
 
+  it "should DROP TABLE after all report runs are deleted." do
+    run_reports!
+    reports.values.each do | r |
+      r.delete!
+    end
+    conn.run("SELECT COUNT(*) AS c FROM qr_report_runs").rows[0]["c"].should == 0
+  end
+
   def run_reports!
     @reports = { }
 
