@@ -48,4 +48,24 @@ describe Qreport::Connection do
     end.should raise_error(Qreport::Error)
     conn.in_transaction?.should == false
   end
+
+  it "can dup to create another connection." do
+    conn1 = Qreport::Connection.new
+    conn1.fd.should == nil
+    conn1.conn
+    conn1.fd.class.should == Fixnum
+    conn2 = nil
+    conn1.transaction do
+      conn1.in_transaction?.should == true
+      conn2 = conn1.dup
+      conn2.in_transaction?.should == false
+    end
+    conn1.in_transaction?.should == false
+    conn2.fd.should == nil
+    conn2.conn
+    conn2.fd.class.should == Fixnum
+    conn2.fd.should_not == conn1.fd
+    conn2.in_transaction?.should == false
+  end
+
 end

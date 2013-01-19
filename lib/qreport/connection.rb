@@ -17,6 +17,12 @@ module Qreport
 
     def initialize args = nil
       @arguments = args
+      initialize_copy nil
+    end
+
+    def initialize_copy src
+      @conn = nil
+      @abort_transaction = @invalid = nil
       @transaction_nesting = 0
     end
 
@@ -41,13 +47,15 @@ module Qreport
             require 'pg'
             @@require_pg = false
           end
-          conn = PG.connect(arguments)
-          @invalid = false
-          @transaction_nesting = 0
-          conn
+          initialize_copy nil
+          PG.connect(arguments)
         end
     end
     @@require_pg = true
+
+    def fd
+      @conn && @conn.socket
+    end
 
     def close
       raise Error, "close during transaction" if in_transaction?
