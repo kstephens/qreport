@@ -26,11 +26,11 @@ module Qreport
 
     def arguments
       @arguments || {
-        :host => env['PGHOST'],
+        :host => env['PGHOST'] || 'test',
         :port => env['PGPORT'],
-        :user => env['PGUSER'],
-        :password => env['PGPASSWORD'],
-        :dbname => env['PGDATABASE'],
+        :user => env['PGUSER'] || 'test',
+        :password => env['PGPASSWORD'] || 'test',
+        :dbname => env['PGDATABASE'] || 'test',
       }
     end
 
