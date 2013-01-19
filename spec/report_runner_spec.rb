@@ -43,28 +43,18 @@ describe Qreport::ReportRunner do
 END
 
     [ '1 days', '2 days', '30 days', '60 days' ].each do | interval |
-      report_run = Qreport::ReportRun.new
-      report_run.name = :new_customer_loan_counts
-      report_run.description = interval
+      report_run = Qreport::ReportRun.new(:name => :users_with_articles, :description => interval)
       report_run.arguments = {
         :now => now,
         :interval => interval,
       }
       report_run.sql = sql
-
-      runner = Qreport::ReportRunner.new
       report_run.additional_columns = [
         [ 'qr_processing_status_id', "integer",                  1 ],
         [ 'qr_processed_at',         "timestamp with time zone", nil ],
         [ 'qr_processing_error',     "text", nil ],
       ]
-      runner.connection = conn
-      begin
-        runner.run!(report_run)
-      rescue ::Exception => exc
-        $stderr.puts "  ERROR: #{exc.inspect}"
-        raise exc
-      end
+      report_run.run! conn
 
       # puts "\n  ReportRun #{report_run.id}"
       # pp report_run

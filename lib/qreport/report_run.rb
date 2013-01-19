@@ -1,9 +1,10 @@
 require 'qreport'
 require 'qreport/model'
+require 'qreport/initialization'
 
 module Qreport
   class ReportRun
-    include Model
+    include Model, Initialization
 
     attr_accessor :id
     attr_accessor :name, :sql, :additional_columns
@@ -38,6 +39,13 @@ module Qreport
 
     def columns
       @columns ||= base_columns + additional_columns.map{|x| x.map(&:to_s)}
+    end
+
+    def run! conn
+      runner = Qreport::ReportRunner.new
+      runner.connection = conn
+      runner.run!(self)
+      self
     end
 
     def self.schema! conn

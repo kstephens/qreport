@@ -34,7 +34,20 @@ Generate a report named "users_with_articles" of all users that have written an 
       EXISTS(SELECT * FROM articles a 
              WHERE a.user_id = u.id AND a.created_on >= NOW() - INTERVAL '30 days')
 
-Qreport translates this query into:
+Create a Qreport::ReportRun:
+
+    conn = Qreport::Connection.new(...)
+    report_run = Qreport::ReportRun.new(:name => :users_with_articles)
+    report_run.sql = <<"END"
+      SELECT u.id AS "user_id"
+      FROM   users u
+      WHERE
+        EXISTS(SELECT * FROM articles a
+               WHERE a.user_id = u.id AND a.created_on >= NOW() - INTERVAL '30 days')
+    END
+    report_run.run! conn
+
+Qreport translates the query above into:
 
     SELECT 0 AS "qr_run_id"
          , nextval('qr_row_seq') AS "qr_row_id"
@@ -57,6 +70,13 @@ Qreport then executes:
     WHERE 
       EXISTS(SELECT * FROM articles a
              WHERE a.user_id = u.id AND a.created_on >= NOW() - INTERVAL '30 days')
+
+The ReportRun object state is updated:
+
+    report_run.id # => Integer
+    report_run.nrows # => Integer
+    report_run.started_at # => Time
+    report_run.finished_at # => Time
 
 Subsequent queries with the same column signature will use "INSERT INTO users_with_articles_abc123".
 
