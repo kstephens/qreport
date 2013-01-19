@@ -86,14 +86,13 @@ module Qreport
     end
 
     def transaction_end abort = nil
-      if @transaction_nesting == 1
+      if (@transaction_nesting -= 1) == 0
         begin
           if abort
             _transaction_abort
           else
             _transaction_commit
           end
-          @transaction_nesting -= 1
         ensure
           if @invalid
             close
