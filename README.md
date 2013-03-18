@@ -57,7 +57,8 @@ Qreport translates the query above into:
       EXISTS(SELECT * FROM articles a
              WHERE a.user_id = u.id AND a.created_on >= NOW() - INTERVAL '30 days')
 
-Then analyzes the columns names and types of this query to produce a unique table name: "users_with_articles_abc123".
+Then analyzes the columns names and types of this query to produce result signature.
+The result signature is used to create a unique report table name: "users_with_articles_abc123".
 The qr_report_runs table keeps track of each report run.
 A record is inserted into the qr_report_runs table with an id of 123.
 Qreport then executes:
