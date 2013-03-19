@@ -57,13 +57,14 @@ Qreport translates the query above into:
       EXISTS(SELECT * FROM articles a
              WHERE a.user_id = u.id AND a.created_on >= NOW() - INTERVAL '30 days')
 
-Then analyzes the columns names and types of this query to produce result signature.
-The result signature is used to create a unique report table name: "users_with_articles_abc123".
+Then analyzes the columns names and types of this query to produce a result signature.
+The result signature is hashed, e.g.: "x2yu78i".
+The result signature hash is used to create a unique report table name: e.g. "users_with_articles_x2yu78i".
 The qr_report_runs table keeps track of each report run.
-A record is inserted into the qr_report_runs table with an id of 123.
+A record is inserted into the qr_report_runs table with a unique id.
 Qreport then executes:
 
-    CREATE TABLE users_with_articles_abc123 AS
+    CREATE TABLE users_with_articles_x2yu78i AS
     SELECT 123 AS "qr_run_id"
          , nextval('qr_row_seq') AS "qr_row_id"
          , u.id AS "user_id"
@@ -79,7 +80,7 @@ The ReportRun object state is updated:
     report_run.started_at # => Time
     report_run.finished_at # => Time
 
-Subsequent queries with the same column signature will use "INSERT INTO users_with_articles_abc123".
+Subsequent queries with the same column signature will use "INSERT INTO users_with_articles_x2yu78i".
 
 New queries, rollups and reports can be built from previous reports.
 
