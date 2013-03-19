@@ -21,9 +21,11 @@ Or install it yourself as:
 Qreport rewrites a plain SQL query so that its result set can populate a report table.
 It automatically creates the report table based on a signature of the column names and types of the query result.
 It can also add additional columns to the report table for other uses, for example: batch processing.
+New queries, rollups and reports can be built from previous reports.
+
 Currently supports PostgreSQL.
 
-## Example:
+## Example
 
 We have users that write articles.
 Generate a report named "users_with_articles" of all users that have written an article in N days:
@@ -82,7 +84,9 @@ The ReportRun object state is updated:
 
 Subsequent queries with the same column signature will use "INSERT INTO users_with_articles_x2yu78i".
 
-New queries, rollups and reports can be built from previous reports.
+## Parameterizing Reports
+
+## Batch Processing
 
 ## Contributing
 
