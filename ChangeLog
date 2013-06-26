@@ -1,7 +1,9 @@
 2013-06-26  Kurt A. Stephens  <ks.github@kurtstephens.com>
 
 	* v0.0.2: New Version: New Functionality.
-	* Connection#conn= for use with existing PGConn objects.
+	* Qreport::Connection#conn= for use with existing PGConn objects.
+	* Test Coverage.
+	* Depends on pg gem.
 
 2013-01-15  Kurt A. Stephens  <ks.github@kurtstephens.com>
 
