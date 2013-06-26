@@ -2,14 +2,16 @@ require 'spec_helper'
 require 'qreport/connection'
 
 describe Qreport::Connection do
-  attr :conn
+  QREPORT_TEST_CONN = [ nil ]
+  def conn
+    QREPORT_TEST_CONN[0] ||= Qreport::Connection.new
+  end
+
   it "can to connect to a test database." do
-    @conn = Qreport::Connection.new
-    @conn.conn.class.should == PG::Connection
+    conn.conn.class.should == PG::Connection
   end
 
   it "can manage transaction state." do
-    @conn = Qreport::Connection.new
     conn.should_receive(:_transaction_begin).once
     conn.should_receive(:_transaction_commit).once
     conn.should_receive(:_transaction_abort).exactly(0).times
@@ -21,7 +23,6 @@ describe Qreport::Connection do
   end
 
   it "can manage nested transactions." do
-    @conn = Qreport::Connection.new
     conn.should_receive(:_transaction_begin).once
     conn.should_receive(:_transaction_commit).once
     conn.should_receive(:_transaction_abort).exactly(0).times
@@ -37,7 +38,6 @@ describe Qreport::Connection do
   end
 
   it "can manage transaction state during raised exceptions" do
-    @conn = Qreport::Connection.new
     conn.should_receive(:_transaction_begin).once
     conn.should_receive(:_transaction_commit).exactly(0).times
     conn.should_receive(:_transaction_abort).once
@@ -69,9 +69,8 @@ describe Qreport::Connection do
   end
 
   it 'can set conn.' do
-    conn1 = Qreport::Connection.new
+    conn1 = conn
     conn1.conn.class.should == PG::Connection
-    conn1.conn_owned.should_not be_false
     conn2 = Qreport::Connection.new(:conn => conn1.conn)
     conn2.conn.object_id.should == conn1.conn.object_id
     conn2.conn_owned.should be_false
