@@ -1,5 +1,10 @@
 2013-06-26  Kurt A. Stephens  <ks.github@kurtstephens.com>
 
+	* v0.0.3: New Version: New Functionality.
+	* Connection#schemaname for table_exists?.
+
+2013-06-26  Kurt A. Stephens  <ks.github@kurtstephens.com>
+
 	* v0.0.2: New Version: New Functionality.
 	* Qreport::Connection#conn= for use with existing PGConn objects.
 	* Fix Boolean and Float escape/unescape.
