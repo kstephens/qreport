@@ -7,10 +7,10 @@ Gem::Specification.new do |gem|
   gem.name          = "qreport"
   gem.version       = Qreport::VERSION
   gem.authors       = ["Kurt Stephens"]
-  gem.email         = ["kurt@enova.com"]
-  gem.description   = %q{TODO: Write a gem description}
-  gem.summary       = %q{TODO: Write a gem summary}
-  gem.homepage      = ""
+  gem.email         = ["ks.github@kurtstephens.com"]
+  gem.description   = %q{Automatically creates materialized report tables from a SQL query.}
+  gem.summary       = %q{Automatically creates materialized report tables from a SQL query.}
+  gem.homepage      = "http://github.com/kstephens/qreport"
 
   gem.files         = `git ls-files`.split($/)
   gem.executables   = gem.files.grep(%r{^bin/}).map{ |f| File.basename(f) }
