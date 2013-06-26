@@ -8,13 +8,6 @@ module Qreport
 
     class << self
       attr_accessor :current
-      def with_current
-        current_save = self.current
-        self.current = self
-        yield
-      ensure
-        self.current = current_save
-      end
     end
 
     def initialize args = nil
