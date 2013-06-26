@@ -86,6 +86,7 @@ describe Qreport::Connection do
     conn.instance_variable_get('@conn').should == nil
   end
 
+  describe "#escape_value, #unescape_value" do
   [
     [ nil, 'NULL' ],
     [ true, "'t'::boolean" ],
@@ -105,6 +106,12 @@ describe Qreport::Connection do
       r = conn.run "SELECT #{sql_x}"
       r = r.rows.first.values.first
       r.should == (return_value || value)
+    end
+  end
+    it "raises TypeError for other values." do
+      lambda do
+        conn.escape_value(Object.new)
+      end.should raise_error(TypeError)
     end
   end
 
