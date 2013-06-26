@@ -4,6 +4,7 @@ require 'time' # iso8601
 module Qreport
   class Connection
     attr_accessor :arguments, :verbose, :verbose_result, :env
+    attr_accessor :schemaname
     attr_accessor :conn, :conn_owned
 
     class << self
@@ -133,11 +134,8 @@ module Qreport
       run "ABORT"; self
     end
 
-    def table_exists? name, schemaname = 'public'
-      #result = run "SELECT * FROM pg_catalog.pg_tables",
-      #:arguments => { :tablename => name }
-      #pp result.rows
-
+    def table_exists? name, schemaname = nil
+      schemaname ||= self.schemaname
       result =
       run "SELECT EXISTS(SELECT * FROM pg_catalog.pg_tables WHERE tablename = :tablename AND schemaname = :schemaname) as \"exists\"",
       :arguments => { :tablename => name, :schemaname => schemaname }
