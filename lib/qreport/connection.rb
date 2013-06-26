@@ -183,10 +183,10 @@ module Qreport
       when nil
         NULL
       when true
-        T
+        T_
       when false
-        F
-      when Integer
+        F_
+      when Integer, Float
         val
       when String, Symbol
         "'" << conn.escape_string(val.to_s) << QUOTE
@@ -200,8 +200,9 @@ module Qreport
     end
     NULL = 'NULL'.freeze
     QUOTE = "'".freeze
+    T_ = "'t'::boolean".freeze
+    F_ = "'f'::boolean".freeze
     T = 't'.freeze
-    F = 'f'.freeze
 
     def unescape_value val, type
       case val
@@ -212,6 +213,8 @@ module Qreport
           val = val == T
         when /int/
           val = val.to_i
+        when "numeric"
+          val = val.to_f
         when /timestamp/
           val = Time.parse(val)
         else
