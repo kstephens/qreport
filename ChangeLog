@@ -2,6 +2,7 @@
 
 	* v0.0.2: New Version: New Functionality.
 	* Qreport::Connection#conn= for use with existing PGConn objects.
+	* Fix Boolean and Float escape/unescape.
 	* Test Coverage.
 	* Depends on pg gem.
 

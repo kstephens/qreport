@@ -75,4 +75,37 @@ describe Qreport::Connection do
     conn2.conn.object_id.should == conn1.conn.object_id
     conn2.conn_owned.should be_false
   end
+
+  it 'can close conn.' do
+    conn.conn.class.should == PG::Connection
+    conn.conn_owned.should_not be_false
+    conn.close
+    conn.instance_variable_get('@conn').should == nil
+    conn.conn_owned.should be_false
+    conn.close
+    conn.instance_variable_get('@conn').should == nil
+  end
+
+  [
+    [ nil, 'NULL' ],
+    [ true, "'t'::boolean" ],
+    [ false, "'f'::boolean" ],
+    [ 1234, '1234' ],
+    [ -1234, '-1234' ],
+    [ 1234.45, '1234.45' ],
+    [ "string with \", \\, and \'", "'string with \", \\, and '''" ],
+    [ :a_symbol!, "'a_symbol!'", :a_symbol!.to_s ],
+    [ Time.parse('2011-04-27T13:23:00.000000Z'), "'2011-04-27T13:23:00.000000Z'::timestamp", Time.parse('2011-04-27T13:23:00.000000') ],
+  ].each do | value, sql, return_value |
+    it "can handle encoding #{value.class.name} value #{value.inspect} as #{sql.inspect}." do
+      conn.escape_value(value).should == sql
+    end
+    it "can handle decoding #{value.class.name} value #{value.inspect}." do
+      sql_x = conn.escape_value(value)
+      r = conn.run "SELECT #{sql_x}"
+      r = r.rows.first.values.first
+      r.should == (return_value || value)
+    end
+  end
+
 end
