@@ -4,6 +4,8 @@ require 'time' # iso8601
 module Qreport
   class Connection
     attr_accessor :arguments, :verbose, :verbose_result, :env
+    attr_accessor :conn, :conn_owned
+
     class << self
       attr_accessor :current
       def with_current
@@ -21,7 +23,7 @@ module Qreport
     end
 
     def initialize_copy src
-      @conn = nil
+      @conn = @conn_owned = nil
       @abort_transaction = @invalid = nil
       @transaction_nesting = 0
     end
@@ -40,6 +42,9 @@ module Qreport
       }
     end
 
+    # Returns the PG connection object.
+    # Create a new connection from #arguments.
+    # New connection will be closed by #close.
     def conn
       @conn ||=
         begin
@@ -48,10 +53,19 @@ module Qreport
             @@require_pg = false
           end
           initialize_copy nil
-          PG.connect(arguments)
+          c = PG.connect(arguments)
+          @conn_owned = true if c
+          c
         end
     end
     @@require_pg = true
+
+    # Sets the PG connection object.
+    # Connection will not closed by #close.
+    def conn= x
+      @conn_owned = false
+      @conn = x
+    end
 
     def fd
       @conn && @conn.socket
@@ -62,11 +76,12 @@ module Qreport
       if @conn
         conn = @conn
         @conn = nil
-        conn.close
+        conn.close if @conn_owned
       end
     ensure
       @invalid = false
       @transaction_nesting = 0
+      @conn_owned = false
     end
 
     def in_transaction?; @transaction_nesting > 0; end
