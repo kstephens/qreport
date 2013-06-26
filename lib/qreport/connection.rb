@@ -20,6 +20,7 @@ module Qreport
     def initialize args = nil
       @arguments = args
       initialize_copy nil
+      @conn = @arguments && @arguments.delete(:conn)
     end
 
     def initialize_copy src

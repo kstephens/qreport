@@ -68,4 +68,12 @@ describe Qreport::Connection do
     conn2.in_transaction?.should == false
   end
 
+  it 'can set conn.' do
+    conn1 = Qreport::Connection.new
+    conn1.conn.class.should == PG::Connection
+    conn1.conn_owned.should_not be_false
+    conn2 = Qreport::Connection.new(:conn => conn1.conn)
+    conn2.conn.object_id.should == conn1.conn.object_id
+    conn2.conn_owned.should be_false
+  end
 end
