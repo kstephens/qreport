@@ -41,9 +41,17 @@ module Qreport
     def base_columns
       @base_columns ||= EMPTY_Array
     end
+    def base_columns= x
+      @base_columns = x
+      @columns = nil
+    end
 
     def additional_columns
       @additional_columns ||= EMPTY_Array
+    end
+    def additional_columns= x
+      @additional_columns ||= EMPTY_Array
+      @columns = nil
     end
 
     def columns
