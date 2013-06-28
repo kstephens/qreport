@@ -98,7 +98,7 @@ module Qreport
     end
 
     def report_sql sql
-      sql = sql.sub(/\ASELECT\s+/im, <<"END"
+      sql = sql.sub(/\A\s*SELECT\s+/im, <<"END"
 SELECT
     :qr_run_id
        AS "qr_run_id"
