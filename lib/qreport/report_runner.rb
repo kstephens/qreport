@@ -8,47 +8,46 @@ require 'pp'
 module Qreport
   class ReportRunner
     attr_accessor :connection, :verbose
+    attr_accessor :report_run, :sql, :arguments
+    attr_accessor :error, :error_1, :error_2
 
     def run! report_run
+      @verbose = true
+      @report_run = report_run
       report_run.created_at ||=
         report_run.started_at = Time.now.utc
       name = report_run.name
-      sql  = report_run.sql.strip
+      @sql = report_run.sql.strip
 
-      arguments = report_run.arguments || { }
-      error = error_1 = error_2 = nrows = nil
+      @arguments = report_run.arguments || { }
+      @error = @error_1 = @error_2 = nrows = nil
 
       Connection.current = connection
 
-      begin
-        conn.transaction do
+      conn.transaction do
+        # Create a report row sequence:
+        run "CREATE TEMPORARY SEQUENCE qr_row_seq"
+      end
 
-          # Create a report row sequence:
-          run "CREATE TEMPORARY SEQUENCE qr_row_seq"
+      # Rewrite query to create result table rows:
+      self.arguments = arguments.merge(:qr_run_id => conn.safe_sql("nextval('qr_row_seq')"))
+      report_run.report_sql = report_sql(sql)
 
-          # Rewrite query to create result table rows:
-          arguments = arguments.merge(:qr_run_id => conn.safe_sql("nextval('qr_row_seq')"))
-          report_run.report_sql = report_sql(sql)
-
-          # Proof query to infer base columns:
-          result = run report_run.report_sql, :limit => 0, :arguments => arguments, :verbose => @verbose
-          report_run.base_columns = result.columns
-          result = nil
-        end # transaction
-      rescue ::Exception => exc
-        error = error_1 = exc
+      # Infer base columns, if not specified.
+      if report_run.base_columns.empty?
+        infer_base_columns!
       end
 
       # Construct report_table name from column names and types:
       report_table = report_run.report_table
 
-      conn.transaction do
-        # Create new ReportRun row:
-        report_run.insert!
-        report_run_id = report_run.id
-        arguments[:qr_run_id] = report_run_id
-        report_run.report_sql = report_sql(sql)
-      end # transaction
+      unless report_run.id
+        conn.transaction do
+          # Create new ReportRun row:
+          report_run.insert!
+        end # transaction
+      end
+      arguments[:qr_run_id] = report_run.id
 
       unless error
         # Run query into report table:
@@ -80,7 +79,7 @@ module Qreport
             result = nil
           end # transaction
         rescue ::Exception => exc
-          error = error_2 = exc
+          @error = @error_2 = exc
         end # transaction
       end
 
@@ -95,6 +94,21 @@ module Qreport
       end # transaction
 
       report_run
+    end
+
+    def infer_base_columns!
+      base_columns = nil
+      begin
+        conn.transaction do
+          # Proof query to infer base columns:
+          result = run report_run.report_sql, :limit => 0, :arguments => arguments, :verbose => @verbose
+          base_columns = report_run.base_columns = result.columns
+        end # transaction
+      rescue ::Exception => exc
+        $stderr.puts "  ERROR: #{exc.inspect}"
+        @error = @error_1 = exc
+      end
+      base_columns
     end
 
     def report_sql sql
