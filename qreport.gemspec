@@ -18,8 +18,11 @@ Gem::Specification.new do |gem|
   gem.require_paths = ["lib"]
 
   gem.add_development_dependency 'rake', '>= 0.9.0'
-  gem.add_development_dependency 'rspec', '~> 2.12.0'
+  gem.add_development_dependency 'rspec', '~> 2.12'
   gem.add_development_dependency 'simplecov', '~> 0.7.1'
+  gem.add_development_dependency "guard", "~> 1.8.0"
+  gem.add_development_dependency "guard-rspec", "~> 3.0.2"
+  gem.add_development_dependency "cassava", "~> 0.0.1"
 
   gem.add_dependency 'pg', '~> 0.14'
 end
