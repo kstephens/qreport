@@ -135,10 +135,13 @@ module Qreport
     end
 
     def table_exists? name, schemaname = nil
-      schemaname ||= self.schemaname
+      schema_name = name.split('.', 2)
+      schema = schema_name.shift if schema_name.size > 1
+      name = schema_name.first
+      schema ||= schemaname || self.schemaname || 'public'
       result =
       run "SELECT EXISTS(SELECT * FROM pg_catalog.pg_tables WHERE tablename = :tablename AND schemaname = :schemaname) as \"exists\"",
-      :arguments => { :tablename => name, :schemaname => schemaname }
+      :arguments => { :tablename => name, :schemaname => schema }
       # result.rows; pp result
       result.rows[0]["exists"]
     end
