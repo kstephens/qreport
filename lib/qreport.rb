@@ -4,5 +4,5 @@ module Qreport
   EMPTY_Hash = {}.freeze
   EMPTY_Array = [].freeze
   EMPTY_String = ''.freeze
-  class Error < ::Exception; end
+  class Error < ::StandardError; end
 end

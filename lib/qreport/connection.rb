@@ -89,7 +89,7 @@ module Qreport
       begin
         transaction_begin
         yield
-      rescue ::Exception => exc
+      rescue ::StandardError => exc
         abort = @abort_transaction = exc
         raise exc
       ensure
@@ -261,7 +261,7 @@ module Qreport
         # $stderr.puts "  ERROR: #{exc.inspect}\n  #{exc.backtrace * "\n  "}"
         query.error = exc.inspect
         raise exc unless options[:capture_error]
-      rescue ::Exception => exc
+      rescue ::StandardError => exc
         @invalid = true
         query.error = exc.inspect
         raise exc unless options[:capture_error]

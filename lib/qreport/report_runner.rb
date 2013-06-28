@@ -12,7 +12,6 @@ module Qreport
     attr_accessor :error, :error_1, :error_2
 
     def run! report_run
-      @verbose = true
       @report_run = report_run
       report_run.created_at ||=
         report_run.started_at = Time.now.utc
@@ -78,7 +77,7 @@ module Qreport
             # pp result
             result = nil
           end # transaction
-        rescue ::Exception => exc
+        rescue ::StandardError => exc
           @error = @error_2 = exc
         end # transaction
       end
@@ -104,8 +103,7 @@ module Qreport
           result = run report_run.report_sql, :limit => 0, :arguments => arguments, :verbose => @verbose
           base_columns = report_run.base_columns = result.columns
         end # transaction
-      rescue ::Exception => exc
-        $stderr.puts "  ERROR: #{exc.inspect}"
+      rescue ::StandardError => exc
         @error = @error_1 = exc
       end
       base_columns
