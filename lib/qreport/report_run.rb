@@ -11,7 +11,7 @@ module Qreport
     attr_accessor :description
     attr_accessor :arguments
     attr_accessor :report_id
-    attr_accessor :report_sql
+    attr_accessor :report_sql, :raw_sql
     attr_accessor :columns, :base_columns, :column_signature
     attr_accessor :report_table
     attr_accessor :nrows

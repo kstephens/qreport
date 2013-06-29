@@ -273,6 +273,7 @@ module Qreport
 
     class Query
       attr_accessor :conn, :sql, :options
+      attr_accessor :sql_prepared
       attr_accessor :error, :cmd_status_raw, :cmd_status, :cmd_tuples
       attr_accessor :nfields, :fields, :ftypes, :fmods
       attr_accessor :type_names

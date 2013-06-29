@@ -54,6 +54,7 @@ module Qreport
         begin
           conn.transaction do
             unless conn.table_exists? report_table
+              result =
               run "CREATE TABLE #{report_table} AS #{report_run.report_sql}", :arguments => arguments, :verbose => @verbose
               run "CREATE INDEX #{report_table}_i1 ON #{report_table} (qr_run_id)"
               run "CREATE INDEX #{report_table}_i2 ON #{report_table} (qr_run_row)"
@@ -64,12 +65,13 @@ module Qreport
             else
               result =
               run "INSERT INTO #{report_table} #{report_run.report_sql}", :arguments => arguments, :verbose => @verbose
-
               # Get the number of report run rows from cmd_status:
               unless cs = result.cmd_status and cs[0] == 'INSERT' and cs[1] == 0 and nrows = cs[2]
                 raise Error, "cannot determine nrows"
               end
             end
+            report_run.raw_sql = result.sql_prepared
+            # $stderr.puts ">>>>>>>>>>>>>>>>>>> #{result.sql_prepared}"
             # Get the number of report run rows:
             unless nrows || error
               result = report_run._select :COLUMNS => 'COUNT(*) AS "nrows"' #, :verbose => true
