@@ -88,6 +88,18 @@ Subsequent queries with the same column signature will use "INSERT INTO users_wi
 
 ## Batch Processing
 
+## Running Tests
+
+Example setup:
+
+   $ sudo -u postgresql psql
+   postgres=# create role test login password 'test';
+   CREATE ROLE
+   postgres=# create database test owner test;
+   CREATE DATABASE
+   postgres=# \q
+   $ PGHOST=localhost PGUSER=test PGDATABSE=test rake
+
 ## Contributing
 
 1. Fork it
