@@ -193,6 +193,8 @@ module Qreport
         "'" << conn.escape_string(val.to_s) << QUOTE
       when Time
         escape_value(val.iso8601(6)) << "::timestamp"
+      when Range
+        "BETWEEN #{escape_value(val.first)} AND #{escape_value(val.last)}"
       when Hash, Array
         escape_value(val.to_json)
       else
