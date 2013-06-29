@@ -12,6 +12,7 @@ module Qreport
     attr_accessor :error, :error_1, :error_2
 
     def run! report_run
+      @verbose ||= report_run.verbose
       @report_run = report_run
       report_run.created_at ||=
         report_run.started_at = Time.now.utc

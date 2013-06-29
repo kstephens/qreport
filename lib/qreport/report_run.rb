@@ -16,6 +16,7 @@ module Qreport
     attr_accessor :report_table
     attr_accessor :nrows
     attr_accessor :created_at, :started_at, :finished_at
+    attr_accessor :verbose
 
     # Construct report_table name from column names and types.
     def report_table
