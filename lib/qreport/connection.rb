@@ -330,6 +330,22 @@ module Qreport
             $1
           end
         end
+        sql = sql_replace_match sql
+      end
+
+      def sql_replace_match sql
+        sql = sql.gsub(/:~\s*\{\{([^\}]+?)\}\}\s*\{\{([^\}]+?)\}\}/) do | m |
+          expr = $1
+          val = $2
+          case expr
+          when /\A\s*BETWEEN\b/
+            "(#{val} #{expr})"
+          when "NULL"
+            "(#{val} IS NULL)"
+          else
+            "(#{val} = #{expr})"
+          end
+        end
         sql
       end
 

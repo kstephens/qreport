@@ -86,6 +86,31 @@ Subsequent queries with the same column signature will use "INSERT INTO users_wi
 
 ## Parameterizing Reports
 
+Report queries can be parameterized using embedded ":word" tags.
+Parameter arguments are saved in the report run table.
+
+    report_run.arguments = {
+      :interval => '30 days',
+    }
+    report_run.run! <<"END"
+    SELECT u.id AS "user_id"
+    FROM   users u
+    WHERE
+      EXISTS(SELECT * FROM articles a
+             WHERE a.user_id = u.id AND a.created_on >= NOW() - INTERVAL :interval)
+    END
+
+Arguments can also represent "matching" patterns using a ":~" tag.
+Example: a Range of Time values matching a.created_on:
+
+    t = Time.now
+    report_run.arguments = {
+      :interval => (t - 86400) ... t,
+    }
+    report_run.run! <<"END"
+    SELECT * FROM articles a WHERe :~ {{:interval}} {{a.created_on}}
+    END
+
 ## Batch Processing
 
 ## Running Tests

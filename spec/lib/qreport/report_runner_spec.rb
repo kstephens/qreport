@@ -57,6 +57,24 @@ END
     report_run.delete!
   end
 
+  it "should support :~ {{PATTERN}} {{EXPR}}." do
+    report_run = Qreport::ReportRun.new(:name => :users_with_articles, :description => 'last 24 hours')
+    now = Time.now
+    report_run.arguments = {
+      :interval => (now - 86400 ... now),
+    }
+    report_run.sql = <<"END"
+    SELECT u.id AS "user_id"
+    FROM   users u
+    WHERE
+      EXISTS(SELECT * FROM articles a WHERE a.user_id = u.id AND :~ {{:interval}} {{a.created_on}});
+END
+    # report_run.verbose = true
+    report_run.run! conn
+    # report_run.raw_sql.should == ''
+    report_run.error.should == nil
+  end
+
   def run_reports!
     @reports = { }
 
