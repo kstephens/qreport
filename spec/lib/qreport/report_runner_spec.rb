@@ -3,7 +3,7 @@ require 'spec_helper'
 describe Qreport::ReportRunner do
   attr :reports, :now
 
-  it "should generate two reports" do
+  it "should generate reports" do
     # conn.verbose = conn.verbose_result = true
     run_reports!
     reports.size.should == 4
@@ -25,6 +25,32 @@ describe Qreport::ReportRunner do
 
     reports.values.each do | r |
       r.delete!
+    end
+  end
+
+  it "should store relevant data in qr_report_runs table" do
+    run_reports!
+    reports.values.each do | r |
+      r2 = r.class.find(r.id)
+      r2.name.should == r.name.to_s
+      r2.description.should == r.description
+      r2.variant.should == r.variant
+      r2.sql.should == r.sql
+      r2.report_table.should == r.report_table
+      r2.base_columns.should == r.base_columns
+      r2.additional_columns.should == r.additional_columns
+      r2.columns.should == r.columns
+      r2.column_signature == r.column_signature
+      r2.error.should == r.error
+      #pending "Time/timestamp timezones" do
+        #r2.created_at.should == r.created_at
+        #r2.started_at.should == r.started_at
+        #r2.finished_at.should == r.finished_at
+      #end
+      r2.nrows.should == r.nrows
+      r2.data.columns.should == r.data.columns
+      r2.data.rows.should == r.data.rows
+      r2.data.rows.size.should == r.nrows
     end
   end
 

@@ -162,6 +162,27 @@ WHERE id = :qr_run_id
 END
     end
 
+    def self.find id
+      obj = new
+      obj.id = id
+      obj.reload!
+    end
+
+    def reload!
+      result = conn.run("SELECT * FROM qr_report_runs WHERE id = :id LIMIT 1", :arguments => { :id => id })
+      result = result.rows.first
+      initialize_from_hash! result
+      @base_columns = JSON.parse(@base_columns)
+      @data = nil
+      self
+    end
+
+    # Return rows from this report run's report table.
+    def data
+      @data ||=
+        _select
+    end
+
     def select options = nil
       options = _options options
       _select({:order_by => 'ORDER BY qr_run_row'}.merge(options))
