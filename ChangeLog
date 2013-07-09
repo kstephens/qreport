@@ -1,3 +1,11 @@
+2013-07-08  Kurt A. Stephens  <ks.github@kurtstephens.com>
+
+	* v0.0.6: New Version: New Functionality.
+	* ReportRun#variant additional key.
+	* ReportRun#data returns all rows of from its report table.
+	* ReportRun.find(id) returns a ReportRun object.
+	* ReportRun#reload! reloads a ReportRun object.
+
 2013-06-26  Kurt A. Stephens  <ks.github@kurtstephens.com>
 
 	* v0.0.3: New Version: New Functionality.

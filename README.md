@@ -123,7 +123,7 @@ Example setup:
    postgres=# create database test owner test;
    CREATE DATABASE
    postgres=# \q
-   $ PGHOST=localhost PGUSER=test PGDATABSE=test rake
+   $ PGHOST=localhost PGUSER=test PGDATABSE=test PGPASSWORD=... rake
 
 ## Contributing
 
