@@ -98,11 +98,14 @@ describe Qreport::Connection do
     [ :a_symbol!, "'a_symbol!'", :a_symbol!.to_s ],
     [ Time.parse('2011-04-27T13:23:00.000000Z'), "'2011-04-27T13:23:00.000000Z'::timestamp", Time.parse('2011-04-27T13:23:00.000000') ],
     [ Time.parse('2011-04-27 13:23:00 -0500'), "'2011-04-27T13:23:00.000000-05:00'::timestamp", Time.parse('2011-04-27 13:23:00 -0500') ],
+    [ [ 1, "2", :three ], "'[1,\"2\",\"three\"]'", :IGNORE ],
+    [ { :a => 1, "b" => 2 }, "'{\"a\":1,\"b\":2}'", :IGNORE ],
   ].each do | value, sql, return_value |
     it "can handle encoding #{value.class.name} value #{value.inspect} as #{sql.inspect}." do
       conn.escape_value(value).should == sql
     end
     it "can handle decoding #{value.class.name} value #{value.inspect}." do
+      pending :if => return_value == :IGNORE
       sql_x = conn.escape_value(value)
       r = conn.run "SELECT #{sql_x}"
       r = r.rows.first.values.first
