@@ -185,8 +185,12 @@ END
       conn.run "SELECT COUNT(*) AS \"count\" from qr_report_runs WHERE report_table = :report_table",
       :arguments => { :report_table => report_table }, :capture_error => true # , :verbose => true
       if result.rows[0]["count"] <= 0
-        conn.run "-- DROP TABLE #{report_table}", :capture_error => true  # , :verbose => true
+        # drop_table!
       end
+    end
+
+    def drop_table! options = nil
+      conn.run "DROP TABLE #{report_table}", :capture_error => true  # , :verbose => true
     end
 
     # Deletes the actual rows for this report run.

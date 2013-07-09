@@ -174,4 +174,12 @@ END
         } }
     end
   end
+
+  after :each do
+    if reports
+      reports.values.each do | r |
+        r.drop_table!
+      end
+    end
+  end
 end
