@@ -38,7 +38,7 @@ describe Qreport::ReportRunner do
 
   it "should capture errors into ReportRun#error." do
     # conn.verbose = true
-    report_run = Qreport::ReportRun.new(:name => :users_with_articles, :description => '10 days')
+    report_run = Qreport::ReportRun.new(:name => :users_with_articles, :variant => '10 days', :description => '10 days')
     report_run.arguments = {
       :now => conn.safe_sql("unknown_column"),
       :interval => '10 days',
@@ -87,7 +87,7 @@ END
 END
 
     [ '1 days', '2 days', '30 days', '60 days' ].each do | interval |
-      report_run = Qreport::ReportRun.new(:name => :users_with_articles, :description => interval)
+      report_run = Qreport::ReportRun.new(:name => :users_with_articles, :description => interval, :variant => interval)
       report_run.arguments = {
         :now => now,
         :interval => interval,

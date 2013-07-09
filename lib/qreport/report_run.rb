@@ -7,7 +7,7 @@ module Qreport
     include Model, Initialization
 
     attr_accessor :id
-    attr_accessor :name, :sql, :additional_columns
+    attr_accessor :name, :variant, :sql, :additional_columns
     attr_accessor :description
     attr_accessor :arguments
     attr_accessor :report_id
@@ -93,6 +93,7 @@ CREATE TABLE -- IF NOT EXISTS
 qr_report_runs (
     id           INTEGER PRIMARY KEY DEFAULT nextval('qr_report_runs_pkey')
   , name         VARCHAR(255) NOT NULL
+  , variant      VARCHAR(255)
   , sql          TEXT NOT NULL
   , description  TEXT NOT NULL
   , arguments    TEXT NOT NULL
@@ -106,6 +107,7 @@ qr_report_runs (
   , nrows        INTEGER
 );
 CREATE INDEX qr_report_runs__name ON qr_report_runs (name);
+CREATE INDEX qr_report_runs__variant ON qr_report_runs (variant);
 CREATE INDEX qr_report_runs__report_table ON qr_report_runs (report_table);
 CREATE INDEX qr_report_runs__created_at ON qr_report_runs (created_at);
 END
@@ -114,6 +116,7 @@ END
     def insert!
       values = {
         :name => name,
+        :variant => variant,
         :sql => sql,
         :description => description,
         :arguments => (arguments || { }),
