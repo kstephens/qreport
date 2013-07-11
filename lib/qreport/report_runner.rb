@@ -24,18 +24,18 @@ module Qreport
 
       Connection.current = connection
 
-      conn.transaction do
-        # Create a report row sequence:
-        run "CREATE TEMPORARY SEQUENCE qr_row_seq"
-      end
-
       # Rewrite query to create result table rows:
       self.arguments = arguments.merge(:qr_run_id => conn.safe_sql("nextval('qr_row_seq')"))
       report_run.report_sql = report_sql(sql)
 
+      conn.transaction do
+        # Create a report row sequence:
+        run "DROP SEQUENCE IF EXISTS   qr_row_seq"
+        run "CREATE TEMPORARY SEQUENCE qr_row_seq"
       # Infer base columns, if not specified.
       if report_run.base_columns.empty?
         infer_base_columns!
+      end
       end
 
       # Construct report_table name from column names and types:
@@ -53,6 +53,10 @@ module Qreport
         # Run query into report table:
         begin
           conn.transaction do
+            # Create a report row sequence:
+            run "DROP SEQUENCE IF EXISTS   qr_row_seq"
+            run "CREATE TEMPORARY SEQUENCE qr_row_seq"
+
             unless conn.table_exists? report_table
               result =
               run "CREATE TABLE #{report_table} AS #{report_run.report_sql}", :arguments => arguments, :verbose => @verbose
@@ -77,6 +81,8 @@ module Qreport
               result = report_run._select :COLUMNS => 'COUNT(*) AS "nrows"' #, :verbose => true
               nrows = result.rows[0]["nrows"] || (raise Error, "cannot determine nrows")
             end
+
+            run "DROP SEQUENCE IF EXISTS qr_row_seq"
             # pp result
             result = nil
           end # transaction
@@ -86,7 +92,7 @@ module Qreport
       end
 
       conn.transaction do
-        run "DROP SEQUENCE qr_row_seq" unless error_1
+        run "DROP SEQUENCE IF EXISTS qr_row_seq"
 
         # Update stats:
         report_run.finished_at = Time.now.utc
