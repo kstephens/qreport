@@ -1,3 +1,7 @@
+2013-07-10  Kurt A. Stephens  <ks.github@kurtstephens.com>
+	* v0.0.7: Bug fix.
+	* Do whatever it takes to DROP SEQUENCE IF EXISTS qr_row_seq for pooled connections.
+
 2013-07-08  Kurt A. Stephens  <ks.github@kurtstephens.com>
 
 	* v0.0.6: New Version: New Functionality.
