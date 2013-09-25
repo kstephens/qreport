@@ -239,11 +239,25 @@ module Qreport
       result
     end
 
-    def type_name type, mod
-      @type_names ||= { }
-      @type_names[[type, mod]] ||=
-        conn.exec("SELECT format_type($1,$2)", [type, mod]).
-        getvalue(0, 0).to_s.dup.freeze
+    # Returns a frozen String representing a column type.
+    # The String also responds to #pg_ftype and #pg_fmod.
+    def type_name *args
+      (@type_names ||= { })[args] ||=
+        _type_name(args)
+    end
+
+    module TypeName
+      attr_accessor :pg_ftype, :pg_fmod
+    end
+
+    def _type_name args
+      x = conn.exec("SELECT format_type($1,$2)", args).
+        getvalue(0, 0).to_s.dup
+      # x = ":#{args * ','}" if x.empty? or x == "unknown"
+      x.extend(TypeName)
+      x.pg_ftype, x.pg_fmod = args
+      x.freeze
+      x
     end
 
     def with_limit sql, limit = nil
