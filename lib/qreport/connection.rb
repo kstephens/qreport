@@ -251,7 +251,7 @@ module Qreport
     end
 
     def _type_name args
-      x = conn.exec("SELECT format_type($1,$2)", args).
+      x = conn.exec("SELECT pg_catalog.format_type($1,$2)", args).
         getvalue(0, 0).to_s.dup
       # x = ":#{args * ','}" if x.empty? or x == "unknown"
       x.extend(TypeName)
