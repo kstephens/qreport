@@ -314,7 +314,7 @@ module Qreport
         @error = nil
         sql = @sql_prepared = prepare_sql self.sql
         if conn.verbose || options[:verbose]
-          out = verbose_stream
+          out = conn.verbose_stream
           out.puts "\n-- =================================================================== --"
           out.puts sql
           out.puts "-- ==== --"
@@ -356,7 +356,7 @@ module Qreport
             unless optional && val.nil?
               val = conn.escape_value(val)
             end
-            verbose_stream.puts "  #{name} => #{val}" if options[:verbose_arguments]
+            conn.verbose_stream.puts "  #{name} => #{val}" if options[:verbose_arguments]
             val
           else
             $1

@@ -1,7 +1,8 @@
 require 'spec_helper'
+require 'stringio'
 
 describe Qreport::ReportRunner do
-  attr :reports, :now
+  attr :reports, :now, :verbose
 
   it "should generate reports" do
     # conn.verbose = conn.verbose_result = true
@@ -106,6 +107,22 @@ END
     report_run.error.should == nil
   end
 
+  it "should support #verbose, #verbose_stream." do
+    conn.verbose = true
+    conn.verbose_stream = StringIO.new('')
+
+    run_reports!
+
+    str = conn.verbose_stream.string
+    str.should =~ /BEGIN/
+    str.should =~ /DROP SEQUENCE IF EXISTS/
+    str.should =~ /CREATE TEMPORARY SEQUENCE/
+    str.should =~ /INSERT INTO users_with_articles/
+    str.should =~ /INSERT INTO qr_report_runs/
+    str.should =~ /UPDATE qr_report_runs/
+    str.should =~ /COMMIT/
+  end
+
   def run_reports!
     @reports = { }
 
@@ -121,6 +138,7 @@ END
 
     [ '1 days', '2 days', '30 days', '60 days' ].each do | interval |
       report_run = Qreport::ReportRun.new(:name => :users_with_articles, :description => interval, :variant => interval)
+      report_run.verbose = verbose
       report_run.arguments = {
         :now => now,
         :interval => interval,

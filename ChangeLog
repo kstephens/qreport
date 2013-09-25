@@ -1,4 +1,8 @@
 2013-09-24  Kurt A. Stephens  <ks.github@kurtstephens.com>
+	* v0.0.9: New Version: Bug fixes.
+	* Use Connection.verbose_stream.
+
+2013-09-24  Kurt A. Stephens  <ks.github@kurtstephens.com>
 	* v0.0.8: Bug fixes, performance improvements, new features.
 	* Correctly handle other Float column types.
 	* User-defined unescape_value functions.
