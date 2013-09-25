@@ -86,7 +86,7 @@ describe Qreport::Connection do
     conn.instance_variable_get('@conn').should == nil
   end
 
-  describe "#escape_value, #unescape_value" do
+  describe "#escape_value/#unescape_value" do
   [
     [ nil, 'NULL' ],
     [ true, "'t'::boolean" ],
@@ -94,22 +94,32 @@ describe Qreport::Connection do
     [ 1234, '1234' ],
     [ -1234, '-1234' ],
     [ 1234.45, '1234.45' ],
+    [ :IGNORE, '1234.56::float', 1234.56 ],
+    [ :IGNORE, '1234.56::float4', 1234.56 ],
+    [ :IGNORE, '1234.56::float8', 1234.56 ],
     [ "string with \", \\, and \'", "'string with \", \\, and '''" ],
     [ :a_symbol!, "'a_symbol!'", :a_symbol!.to_s ],
     [ Time.parse('2011-04-27T13:23:00.000000Z'), "'2011-04-27T13:23:00.000000Z'::timestamp", Time.parse('2011-04-27T13:23:00.000000') ],
     [ Time.parse('2011-04-27 13:23:00 -0500'), "'2011-04-27T13:23:00.000000-05:00'::timestamp", Time.parse('2011-04-27 13:23:00 -0500') ],
     [ [ 1, "2", :three ], "'[1,\"2\",\"three\"]'", :IGNORE ],
     [ { :a => 1, "b" => 2 }, "'{\"a\":1,\"b\":2}'", :IGNORE ],
-  ].each do | value, sql, return_value |
+  ].each do | value, sql, return_value, sql_expr, sql_value |
     it "can handle encoding #{value.class.name} value #{value.inspect} as #{sql.inspect}." do
+      pending "not supported", :if => value == :IGNORE
       conn.escape_value(value).should == sql
     end
-    it "can handle decoding #{value.class.name} value #{value.inspect}." do
-      pending :if => return_value == :IGNORE
-      sql_x = conn.escape_value(value)
-      r = conn.run "SELECT #{sql_x}"
+
+    sql_expr = sql
+    sql_value = return_value
+    sql_value = nil if sql_value == :IGNORE
+    sql_value ||= value
+    it "can handle decoding #{sql_expr.inspect} as #{sql_value.inspect}." do
+      pending "not supported", :if => return_value == :IGNORE
+      sql_x = conn.escape_value(sql_expr)
+      r = conn.run "SELECT #{sql_x} AS value"
+      PP.pp r.columns
       r = r.rows.first.values.first
-      r.should == (return_value || value)
+      r.should == sql_value
     end
   end
     it "raises TypeError for other values." do

@@ -218,7 +218,7 @@ module Qreport
           val = val == T
         when /int/
           val = val.to_i
-        when "numeric"
+        when /double/, "numeric"
           val = val.to_f
         when /timestamp/
           val = Time.parse(val)
