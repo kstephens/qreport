@@ -8,6 +8,7 @@ module Qreport
     attr_accessor :verbose, :verbose_result, :verbose_stream
     attr_accessor :schemaname
     attr_accessor :conn, :conn_owned
+    attr_accessor :unescape_value_funcs
 
     class << self
       attr_accessor :current
@@ -24,6 +25,7 @@ module Qreport
     def initialize_copy src
       @conn = @conn_owned = nil
       @abort_transaction = @invalid = nil
+      @unescape_value_funcs_cache = nil
       @transaction_nesting = 0
     end
 
@@ -211,24 +213,33 @@ module Qreport
 
     def unescape_value val, type
       case val
+      when nil
       when String
         return nil if val == NULL
-        case type
-        when "boolean"
-          val = val == T
-        when /int/
-          val = val.to_i
-        when /double/, "numeric"
-          val = val.to_f
-        when /timestamp/
-          val = Time.parse(val)
-        else
-          val
-        end
+        func = (@unescape_value_funcs_cache ||= { })[type] ||= unescape_value_func(type)
+        val = func.call(val, type)
+      end
+      val
+    end
+
+    def unescape_value_func type
+      if @unescape_value_funcs and func = @unescape_value_funcs[type]
+        return func
+      end
+      case type
+      when /^bool/
+        lambda { | val, type | val == T }
+      when /^(int|smallint|bigint|oid|tid|xid|cid)/
+        lambda { | val, type | val.to_i }
+      when /^(float|real|double|numeric)/
+        lambda { | val, type | val.to_f }
+      when /^timestamp/
+        lambda { | val, type | Time.parse(val) }
       else
-        val
+        IDENTITY
       end
     end
+    IDENTITY = lambda { | val, type | val }
 
     def verbose_stream
       @verbose_stream || $stderr

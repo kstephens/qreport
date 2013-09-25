@@ -86,6 +86,33 @@ describe Qreport::Connection do
     conn.instance_variable_get('@conn').should == nil
   end
 
+  describe "#unescape_value" do
+    it "should not alter undefined types" do
+      conn.unescape_value(123, :UNDEFINED1).should == 123
+      conn.unescape_value("str", :UNDEFINED1).should == "str"
+      conn.unescape_value(:sym, :UNDEFINED1).should == :sym
+    end
+
+    it "should handle boolean" do
+      conn.unescape_value("t", 'boolean').should == true
+      conn.unescape_value("f", 'boolean').should == false
+      conn.unescape_value(true, 'boolean').should == true
+      conn.unescape_value(false, 'boolean').should == false
+    end
+
+    it "should handle floats" do
+      conn.unescape_value(123, 'float').should == 123
+      conn.unescape_value("123.45", 'float').should == 123.45
+      conn.unescape_value(123.45, 'float').should == 123.45
+      conn.unescape_value("123.45", 'double precision').should == 123.45
+    end
+
+    it "should handle defined types" do
+      conn.unescape_value_funcs = { 'money' => lambda { | val, type | [ val ] } }
+      conn.unescape_value("123.00", 'money').should == [ "123.00" ]
+    end
+  end
+
   describe "#escape_value/#unescape_value" do
   [
     [ nil, 'NULL' ],
