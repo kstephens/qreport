@@ -108,7 +108,7 @@ Example: a Range of Time values matching a.created_on:
       :interval => (t - 86400) ... t,
     }
     report_run.run! <<"END"
-    SELECT * FROM articles a WHERe :~ {{:interval}} {{a.created_on}}
+    SELECT * FROM articles a WHERE :~ {{:interval}} {{a.created_on}}
     END
 
 ## Batch Processing
@@ -123,7 +123,7 @@ Example setup:
    postgres=# create database test owner test;
    CREATE DATABASE
    postgres=# \q
-   $ PGHOST=localhost PGUSER=test PGDATABSE=test PGPASSWORD=... rake
+   $ PGHOST=localhost PGUSER=test PGDATABASE=test PGPASSWORD=... rake
 
 ## Contributing
 
