@@ -1,9 +1,11 @@
 require 'qreport'
 require 'time' # iso8601
+require 'pp' # dump_result!
 
 module Qreport
   class Connection
-    attr_accessor :arguments, :verbose, :verbose_result, :env
+    attr_accessor :arguments, :env
+    attr_accessor :verbose, :verbose_result, :verbose_stream
     attr_accessor :schemaname
     attr_accessor :conn, :conn_owned
 
@@ -158,7 +160,7 @@ module Qreport
       result.options = options
       result.conn = self
       result.run!
-      dump_result result if @verbose_result || options[:verbose_result]
+      dump_result! result if @verbose_result || options[:verbose_result]
       result
     end
 
@@ -228,8 +230,12 @@ module Qreport
       end
     end
 
-    def dump_result result
-      pp result if result
+    def verbose_stream
+      @verbose_stream || $stderr
+    end
+
+    def dump_result! result, stream = nil
+      PP.pp(result, stream || verbose_stream) if result
       result
     end
 
@@ -283,9 +289,10 @@ module Qreport
         @error = nil
         sql = @sql_prepared = prepare_sql self.sql
         if conn.verbose || options[:verbose]
-          $stderr.puts "\n-- =================================================================== --"
-          $stderr.puts sql
-          $stderr.puts "-- ==== --"
+          out = verbose_stream
+          out.puts "\n-- =================================================================== --"
+          out.puts sql
+          out.puts "-- ==== --"
         end
         return self if options[:dry_run]
         if result = conn.run_query!(sql, self, options)
@@ -324,7 +331,7 @@ module Qreport
             unless optional && val.nil?
               val = conn.escape_value(val)
             end
-            $stderr.puts "  #{name} => #{val}" if options[:verbose_arguments]
+            verbose_stream.puts "  #{name} => #{val}" if options[:verbose_arguments]
             val
           else
             $1
