@@ -200,7 +200,7 @@ module Qreport
       when Hash, Array
         escape_value(val.to_json)
       else
-        raise TypeError
+        raise TypeError, "cannot escape_value on #{val.class.name}"
       end.to_s
     end
     NULL = 'NULL'.freeze
