@@ -128,25 +128,30 @@ describe Qreport::Connection do
     [ :a_symbol!, "'a_symbol!'", :a_symbol!.to_s ],
     [ Time.parse('2011-04-27T13:23:00.000000Z'), "'2011-04-27T13:23:00.000000Z'::timestamp", Time.parse('2011-04-27T13:23:00.000000') ],
     [ Time.parse('2011-04-27 13:23:00 -0500'), "'2011-04-27T13:23:00.000000-05:00'::timestamp", Time.parse('2011-04-27 13:23:00 -0500') ],
+    [ :IGNORE, "'13:23'::time", '13:23:00' ],
     [ [ 1, "2", :three ], "'[1,\"2\",\"three\"]'", :IGNORE ],
     [ { :a => 1, "b" => 2 }, "'{\"a\":1,\"b\":2}'", :IGNORE ],
   ].each do | value, sql, return_value, sql_expr, sql_value |
+    if value != :IGNORE
     it "can handle encoding #{value.class.name} value #{value.inspect} as #{sql.inspect}." do
-      pending "not supported", :if => value == :IGNORE
       conn.escape_value(value).should == sql
     end
+    end
 
-    sql_expr = sql
     sql_value = return_value
     sql_value = nil if sql_value == :IGNORE
     sql_value ||= value
-    it "can handle decoding #{sql_expr.inspect} as #{sql_value.inspect}." do
-      pending "not supported", :if => return_value == :IGNORE
-      sql_x = conn.escape_value(sql_expr)
-      r = conn.run "SELECT #{sql_x} AS value"
-      PP.pp r.columns
+    if return_value != :IGNORE
+    it "can handle decoding #{sql.inspect} as #{sql_value.inspect}." do
+      sql_x = sql # conn.escape_value(sql)
+      r = conn.run %Q{SELECT #{sql_x} AS "value"}
+      # PP.pp r.columns
+      # PP.pp r.ftypes
+      # PP.pp r.fmods
       r = r.rows.first.values.first
       r.should == sql_value
+      r.class.should == sql_value.class
+    end
     end
   end
     it "raises TypeError for other values." do

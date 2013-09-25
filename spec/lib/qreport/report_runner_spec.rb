@@ -21,7 +21,11 @@ describe Qreport::ReportRunner do
     r.select(:limit => [ 4, 2 ]).rows.map{|x| x["user_id"]}.should == [ 3, 4, 5, 6 ]
 
     r = reports['60 days']
-    r.select.rows.map{|x| x["user_id"]}.should == (1..10).to_a
+    rows = r.select.rows
+    rows.map{|x| x["user_id"]}.should == (1..10).to_a
+
+    r.columns.should == [["qr_run_id", "bigint"], ["qr_run_row", "bigint"], ["user_id", "integer"], ["user_rank", "double precision"]]
+    rows.map{|x| x["user_rank"].class}.should == [ Float ] * 10
 
     reports.values.each do | r |
       r.delete!
@@ -106,7 +110,9 @@ END
     @reports = { }
 
     sql = <<"END"
-    SELECT u.id AS "user_id"
+    SELECT
+        u.id AS "user_id"
+      , u.id / (SELECT MAX(id) FROM users)::float as "user_rank"
     FROM   users u
     WHERE
       EXISTS(SELECT * FROM articles a WHERE a.user_id = u.id AND a.created_on >= :now - INTERVAL :interval)
