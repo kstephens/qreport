@@ -76,8 +76,9 @@ describe Qreport::ReportRunner do
       EXISTS(SELECT * FROM articles a WHERE a.user_id = u.id AND a.created_on >= :now - INTERVAL :interval)
 END
     report_run.run! conn
+    report_run.error_object.should be_a PG::Error
     report_run.error.class.should == Hash
-    report_run.error[:error_class].should == 'PG::Error'
+    report_run.error[:error_class].should =~ /^PG::/
     report_run.error[:error_message].should =~ /column "unknown_column" does not exist/
 
     report_run.delete!

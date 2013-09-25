@@ -80,11 +80,14 @@ module Qreport
       when String
         @error = JSON.parse(x)
       when Exception
+        @error_object = x
         @error = { :error_class => x.class.name, :error_message => x.message }
       else
         raise TypeError
       end
     end
+
+    def error_object; @error_object || @error; end
 
     def self.schema! conn, options = { }
       result = conn.run <<"END", options.merge(:capture_error => true) # , :verbose => true
