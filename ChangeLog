@@ -1,3 +1,10 @@
+2013-09-24  Kurt A. Stephens  <ks.github@kurtstephens.com>
+	* v0.0.8: Bug fixes, performance improvements, new features.
+	* Correctly handle other Float column types.
+	* User-defined unescape_value functions.
+	* User-defined verbose output stream.
+	* Ephermeral ReportRun#error_object.
+
 2013-07-10  Kurt A. Stephens  <ks.github@kurtstephens.com>
 	* v0.0.7: Bug fix.
 	* Do whatever it takes to DROP SEQUENCE IF EXISTS qr_row_seq for pooled connections.
