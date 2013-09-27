@@ -32,10 +32,10 @@ module Qreport
         # Create a report row sequence:
         run "DROP SEQUENCE IF EXISTS   qr_row_seq"
         run "CREATE TEMPORARY SEQUENCE qr_row_seq"
-      # Infer base columns, if not specified.
-      if report_run.base_columns.empty?
-        infer_base_columns!
-      end
+        # Infer base columns, if not specified.
+        if report_run.base_columns.empty?
+          infer_base_columns!
+        end
       end
 
       # Construct report_table name from column names and types:
