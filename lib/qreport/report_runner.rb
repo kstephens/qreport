@@ -109,7 +109,7 @@ module Qreport
       begin
         conn.transaction do
           # Proof query to infer base columns:
-          result = run report_run.report_sql, :limit => 0, :arguments => arguments, :verbose => @verbose
+          result = run report_sql(sql, :limit => 'LIMIT 0'), :arguments => arguments, :verbose => @verbose
           base_columns = report_run.base_columns = result.columns
         end # transaction
       rescue ::StandardError => exc
@@ -118,16 +118,20 @@ module Qreport
       base_columns
     end
 
-    def report_sql sql
-      sql = sql.sub(/\A\s*SELECT\s+/im, <<"END"
+    def report_sql sql, opts = { }
+      sql = sql.sub(/;\s*\Z/, '')
+      sql = <<"END"
 SELECT
     :qr_run_id
        AS "qr_run_id"
   , nextval('qr_row_seq')
        AS "qr_run_row"
-  , 
+  , _qr_r_.*
+FROM (
+#{sql}
+) AS "_qr_r_"
+#{opts[:limit]}
 END
-          )
       sql
     end
 
