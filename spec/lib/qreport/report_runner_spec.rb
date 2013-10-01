@@ -89,6 +89,33 @@ END
     report_run.delete!
   end
 
+  it "should support CTE queries." do
+    report_run = Qreport::ReportRun.new(:name => :counts, :description => 'CTE test')
+    report_run.sql = <<"END"
+WITH
+    total_users AS
+(
+SELECT count(*) AS total_users
+FROM users
+)
+  , total_articles AS
+(
+SELECT count(*) AS total_articles
+FROM articles
+)
+SELECT total_users.*, total_articles.*
+FROM total_users, total_articles;
+END
+    report_run.verbose = true
+    report_run.run! conn
+    report_run.columns.should == [["qr_run_id", "bigint"], ["qr_run_row", "bigint"], ["total_users", "bigint"], ["total_articles", "bigint"]]
+    rows = report_run.select.rows
+    rows.size.should == 1
+    row = rows[0]
+    row['total_users'].should == 10
+    row['total_articles'].should == 100
+  end
+
   it "should support :~ {{PATTERN}} {{EXPR}}." do
     report_run = Qreport::ReportRun.new(:name => :users_with_articles, :description => 'last 24 hours')
     now = Time.now
