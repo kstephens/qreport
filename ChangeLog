@@ -1,3 +1,7 @@
+2013-10-01  Kurt A. Stephens  <ks.github@kurtstephens.com>
+	* v0.0.10: New Features.
+	* Support CTE queries using "FROM (<subselect>) AS" syntax.
+
 2013-09-24  Kurt A. Stephens  <ks.github@kurtstephens.com>
 	* v0.0.9: New Version: Bug fixes.
 	* Use Connection#verbose_stream.
