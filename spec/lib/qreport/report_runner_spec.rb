@@ -106,7 +106,6 @@ FROM articles
 SELECT total_users.*, total_articles.*
 FROM total_users, total_articles;
 END
-    report_run.verbose = true
     report_run.run! conn
     report_run.columns.should == [["qr_run_id", "bigint"], ["qr_run_row", "bigint"], ["total_users", "bigint"], ["total_articles", "bigint"]]
     rows = report_run.select.rows
@@ -165,7 +164,6 @@ END
 
     [ '1 days', '2 days', '30 days', '60 days' ].each do | interval |
       report_run = Qreport::ReportRun.new(:name => :users_with_articles, :description => interval, :variant => interval)
-      report_run.verbose = verbose
       report_run.arguments = {
         :now => now,
         :interval => interval,
