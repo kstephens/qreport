@@ -56,6 +56,7 @@ describe Qreport::ReportRunner do
       r2.data.columns.should == r.data.columns
       r2.data.rows.should == r.data.rows
       r2.data.rows.size.should == r.nrows
+      r2.data.cmd_status[0].should == "SELECT"
     end
   end
 

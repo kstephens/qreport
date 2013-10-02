@@ -182,8 +182,7 @@ END
 
     # Return rows from this report run's report table.
     def data
-      @data ||=
-        _select
+      @data ||= ReportRun::Data.new(self)
     end
 
     def select options = nil
@@ -229,3 +228,5 @@ END
     end
   end
 end
+
+require 'qreport/report_run/data'

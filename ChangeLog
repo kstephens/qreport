@@ -1,3 +1,7 @@
+2013-10-02  Kurt A. Stephens  <ks.github@kurtstephens.com>
+	* v0.0.11: New Features.
+	* ReportRun#data.columns: avoid pulling in entire report rows.
+
 2013-10-01  Kurt A. Stephens  <ks.github@kurtstephens.com>
 	* v0.0.10: New Features.
 	* Support CTE queries using "FROM (<subselect>) AS" syntax.
