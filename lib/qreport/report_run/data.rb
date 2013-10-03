@@ -8,12 +8,9 @@ module Qreport
 
       def initialize report_run; @report_run = report_run; end
 
-      def columns; _select0.columns; end
+      def columns;    _select0.columns; end
       def type_names; _select0.type_names; end
-
-      def rows
-        @rows ||= _select.rows
-      end
+      def rows;       _select.rows; end
 
       # Delegate all other methods to the Connection::Query object.
       def method_missing sel, *args, &blk
