@@ -24,6 +24,8 @@ module Qreport
           extract_results! result
         end
         self
+      ensure
+        @conn = nil
       end
 
       def prepare_sql sql
@@ -93,8 +95,12 @@ module Qreport
         @ftypes = (0 ... nfields).map{|i| result.ftype(i) }
         @fmods  = (0 ... nfields).map{|i| result.fmod(i) }
         @rows = result.to_a
-        result.clear
+        type_names
+        rows
         self
+      ensure
+        result.clear
+        @conn = nil
       end
 
       def columns
@@ -102,7 +108,7 @@ module Qreport
       end
 
       def type_names
-        @type_names ||= (0 ... nfields).map{|i| conn.type_name(@ftypes[i], @fmods[i])}
+        @type_names ||= (0 ... nfields).map{|i| @conn.type_name(@ftypes[i], @fmods[i])}
       end
 
       def cmd_status
@@ -115,9 +121,9 @@ module Qreport
 
       def rows
         return @rows if @rows_unescaped
-        @rows.each do | r |
+        (@rows ||= [ ]).each do | r |
           columns.each do | c, t |
-            r[c] = conn.unescape_value(r[c], t)
+            r[c] = @conn.unescape_value(r[c], t)
           end
         end
         @rows_unescaped = true
