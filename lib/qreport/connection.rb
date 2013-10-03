@@ -1,5 +1,6 @@
 require 'qreport'
 require 'time' # iso8601
+require 'rational' # Rational
 require 'pp' # dump_result!
 
 module Qreport
@@ -191,7 +192,9 @@ module Qreport
         T_
       when false
         F_
-      when Integer, Float
+      when Rational
+        val.to_f
+      when Numeric
         val
       when String, Symbol
         "'" << conn.escape_string(val.to_s) << QUOTE
@@ -199,8 +202,16 @@ module Qreport
         escape_value(val.iso8601(6)) << "::timestamp"
       when Range
         "BETWEEN #{escape_value(val.first)} AND #{escape_value(val.last)}"
-      when Hash, Array
+      when Hash
         escape_value(val.to_json)
+      when Array
+        case
+        when val.all?{|x| Numeric === x || x.nil?}
+          "ARRAY[#{val.map{|x| escape_value(x)} * ','}]"
+        else
+          # PUNT!!!
+          escape_value(val.to_json)
+        end
       else
         raise TypeError, "cannot escape_value on #{val.class.name}"
       end.to_s
@@ -227,6 +238,15 @@ module Qreport
         return func
       end
       case type
+      when /\[\]\Z/
+        et = $`
+        el = unescape_value_func(et)
+        lambda do | val, type |
+#          PP.pp([ val, type, et ])
+          val.gsub(/\A\{|\}\Z/, '').
+            split(',').
+            map{|x| x == 'NULL' ? nil : el.call(x, et)}
+        end
       when /^bool/
         lambda { | val, type | val == T }
       when /^(int|smallint|bigint|oid|tid|xid|cid)/
