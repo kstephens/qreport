@@ -47,6 +47,19 @@ describe Qreport::Connection do
     conn.in_transaction?.should == false
   end
 
+
+  it "will error upon #close during transaction" do
+    conn.should_receive(:_transaction_begin).exactly(1).times
+    conn.should_receive(:_transaction_commit).exactly(0).times
+    conn.should_receive(:_transaction_abort).exactly(1).times
+    lambda do
+      conn.transaction do
+        conn.close
+      end
+    end.should raise_error(Qreport::Error)
+    conn.in_transaction?.should == false
+  end
+
   it "can dup to create another connection." do
     conn1 = Qreport::Connection.new
     conn1.fd.should == nil

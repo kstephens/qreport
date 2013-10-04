@@ -78,7 +78,6 @@ module Qreport
       _close
     ensure
       @invalid = false
-      @transaction_nesting = 0
     end
 
     def _close
@@ -89,6 +88,7 @@ module Qreport
       end
     ensure
       @conn_owned = false
+      @transaction_nesting = 0
     end
 
 
