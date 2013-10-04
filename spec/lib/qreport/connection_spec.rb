@@ -10,8 +10,8 @@ describe Qreport::Connection do
   end
 
   it "can manage transaction state." do
-    conn.should_receive(:_transaction_begin).once
-    conn.should_receive(:_transaction_commit).once
+    conn.should_receive(:_transaction_begin).exactly(1).times
+    conn.should_receive(:_transaction_commit).exactly(1).times
     conn.should_receive(:_transaction_abort).exactly(0).times
     conn.in_transaction?.should == false
     conn.transaction do
@@ -21,8 +21,8 @@ describe Qreport::Connection do
   end
 
   it "can manage nested transactions." do
-    conn.should_receive(:_transaction_begin).once
-    conn.should_receive(:_transaction_commit).once
+    conn.should_receive(:_transaction_begin).exactly(1).times
+    conn.should_receive(:_transaction_commit).exactly(1).times
     conn.should_receive(:_transaction_abort).exactly(0).times
     conn.in_transaction?.should == false
     conn.transaction do
@@ -36,9 +36,9 @@ describe Qreport::Connection do
   end
 
   it "can manage transaction state during raised exceptions" do
-    conn.should_receive(:_transaction_begin).once
+    conn.should_receive(:_transaction_begin).exactly(1).times
     conn.should_receive(:_transaction_commit).exactly(0).times
-    conn.should_receive(:_transaction_abort).once
+    conn.should_receive(:_transaction_abort).exactly(1).times
     lambda do
       conn.transaction do
         raise Qreport::Error, "#{__LINE__}"
