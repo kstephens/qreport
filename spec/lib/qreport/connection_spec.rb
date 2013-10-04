@@ -2,10 +2,8 @@ require 'spec_helper'
 require 'qreport/connection'
 
 describe Qreport::Connection do
-  QREPORT_TEST_CONN = [ nil ]
-  def conn
-    QREPORT_TEST_CONN[0] ||= Qreport::Connection.new
-  end
+  let(:conn) { Qreport::Connection.new }
+  after(:each) { conn._close }
 
   it "can to connect to a test database." do
     conn.conn.class.should == PG::Connection

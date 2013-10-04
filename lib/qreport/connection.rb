@@ -75,16 +75,22 @@ module Qreport
 
     def close
       raise Error, "close during transaction" if in_transaction?
+      _close
+    ensure
+      @invalid = false
+      @transaction_nesting = 0
+    end
+
+    def _close
       if @conn
         conn = @conn
         @conn = nil
         conn.close if @conn_owned
       end
     ensure
-      @invalid = false
-      @transaction_nesting = 0
       @conn_owned = false
     end
+
 
     def in_transaction?; @transaction_nesting > 0; end
 
