@@ -188,7 +188,8 @@ module Qreport
       conn.escape_identifier name.to_s
     end
 
-    def escape_value val
+    def escape_value val, example_value = nil
+      example_val ||= val
       case val
       when SQL
         val.to_s
@@ -212,8 +213,12 @@ module Qreport
         escape_value(val.to_json)
       when Array
         case
-        when val.all?{|x| Numeric === x || x.nil?}
-          "ARRAY[#{val.map{|x| escape_value(x)} * ','}]"
+        when true
+          # PUNT!!!
+          escape_value(val.to_json)
+          # DOES NOT HANDLE EMPTY ARRAY!!!
+        when example_val.all?{|x| Numeric === x || x.nil?} && ! example_val.empty?
+          "ARRAY[#{val.map{|x| escape_value(x, example_val[0])} * ','}]"
         else
           # PUNT!!!
           escape_value(val.to_json)
