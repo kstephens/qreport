@@ -20,11 +20,11 @@ module Qreport
 private
 
       def _select
-        @_select ||= report_run._select
+        @_select ||= report_run._select(:capture_error => true)
       end
 
       def _select0
-        @_select0 ||= (@_select || report_run._select(:limit => 0))
+        @_select0 ||= (@_select || report_run._select(:capture_error => true, :limit => 0))
       end
 
     end
