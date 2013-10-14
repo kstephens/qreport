@@ -318,20 +318,25 @@ module Qreport
     end
 
     def run_query! sql, query, options = nil
+      error = nil
       options ||= EMPTY_Hash
+      # $stderr.puts "  run_query! options = #{options.inspect}"
       result = nil
       begin
         result = conn.async_exec(sql)
       rescue ::PG::Error => exc
-        # $stderr.puts "  ERROR: #{exc.inspect}\n  #{exc.backtrace * "\n  "}"
-        query.error = exc.inspect
-        raise exc unless options[:capture_error]
+        error = exc
       rescue ::StandardError => exc
         @invalid = true
-        query.error = exc.inspect
-        raise exc unless options[:capture_error]
+        error = exc
       end
       result
+    ensure
+      if error
+        # $stderr.puts "  ERROR: #{exc.inspect}\n  #{exc.backtrace * "\n  "}"
+        query.error = error.inspect
+        raise error unless options[:capture_error]
+      end
     end
 
   end
