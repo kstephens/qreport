@@ -11,6 +11,7 @@ module Qreport
       def columns;    _select0.columns; end
       def type_names; _select0.type_names; end
       def rows;       _select.rows; end
+      def error;      _select0.error; end
 
       # Delegate all other methods to the Connection::Query object.
       def method_missing sel, *args, &blk
