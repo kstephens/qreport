@@ -205,7 +205,7 @@ module Qreport
       when String, Symbol
         "'" << conn.escape_string(val.to_s) << QUOTE
       when Time
-        escape_value(val.iso8601(6)) << "::timestamp"
+        escape_value(val.iso8601(6)) << S_TIMESTAMP
       when Range
         "BETWEEN #{escape_value(val.first)} AND #{escape_value(val.last)}"
       when Hash
@@ -227,6 +227,7 @@ module Qreport
     T_ = "'t'::boolean".freeze
     F_ = "'f'::boolean".freeze
     T = 't'.freeze
+    S_TIMESTAMP = "::timestamp".freeze
 
     def unescape_value val, type
       case val
