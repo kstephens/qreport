@@ -12,6 +12,8 @@ module Qreport
 
       def run!
         @error = nil
+        @fields = @ftypes = @mods = EMPTY_Array
+        @nfields = 0
         sql = @sql_prepared = prepare_sql self.sql
         if conn.verbose || options[:verbose]
           out = conn.verbose_stream
@@ -85,7 +87,7 @@ module Qreport
 
       def extract_results! result
         error = result.error_message
-        error &&= ! error.empty? && error
+        error = nil if error.empty?
         @error = error
         @cmd_status_raw = result.cmd_status
         @cmd_tuples = result.cmd_tuples
