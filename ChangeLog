@@ -1,3 +1,10 @@
+2013-10-14  Kurt A. Stephens  <ks.github@kurtstephens.com>
+	* v0.1.0: New Features.
+	* Handle Connection#close cleanly.
+	* Handle Rational data.
+	* Preliminary ARRAY[] data.
+	* Trap errors in ReportRun#data SELECT.
+
 2013-10-02  Kurt A. Stephens  <ks.github@kurtstephens.com>
 	* v0.0.11: New Features.
 	* ReportRun#data.columns: avoid pulling in entire report rows.
